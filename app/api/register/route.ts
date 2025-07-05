@@ -1,72 +1,50 @@
-import NextAuth, { AuthOptions } from "next-auth";
-import GoogleProvider from "next-auth/providers/google";
-import CredentialsProvider from "next-auth/providers/credentials";
-import bcrypt from "bcryptjs";
+import { NextResponse } from "next/server";
 import { connectToDB } from "@/lib/mongodb";
 import User from "@/lib/user";
+import bcrypt from "bcryptjs";
 
-// ✅ EXPORTING authOptions so other files like dashboard can import it
-export const authOptions: AuthOptions = {
-  providers: [
-    GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID!,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-    }),
-    CredentialsProvider({
-      name: "Credentials",
-      credentials: {
-        email: { label: "Email", type: "text" },
-        password: { label: "Password", type: "password" },
-      },
-      async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) return null;
+export async function POST(request: Request) {
+  try {
+    const { email, password, name } = await request.json();
 
-        await connectToDB();
-        const user = await User.findOne({ email: credentials.email });
-        if (!user) return null;
+    if (!email || !password || !name) {
+      return NextResponse.json(
+        { error: "All fields are required" },
+        { status: 400 }
+      );
+    }
 
-        const isValid = await bcrypt.compare(credentials.password, user.password);
-        if (!isValid) return null;
+    await connectToDB();
+    
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return NextResponse.json(
+        { error: "User already exists" },
+        { status: 400 }
+      );
+    }
 
-        return {
-          id: user._id.toString(),
-          name: user.name,
-          email: user.email,
-        } satisfies Record<string, string>;
-      },
-    }),
-  ],
+    const hashedPassword = await bcrypt.hash(password, 12);
+    
+    const newUser = new User({
+      email,
+      password: hashedPassword,
+      name,
+    });
 
-  pages: {
-    signIn: "/login",
-  },
+    await newUser.save();
 
-  session: {
-    strategy: "jwt",
-  },
+    return NextResponse.json(
+      { message: "User created successfully" },
+      { status: 201 }
+    );
+  } catch (error) {
+    console.error("Registration error:", error);
+    return NextResponse.json(
+      { error: "An error occurred during registration" },
+      { status: 500 }
+    );
+  }
+}
 
-  secret: process.env.NEXTAUTH_SECRET,
-
-  callbacks: {
-    async jwt({ token, user }) {
-      if (user) {
-        return {
-          ...token,
-          id: (user as { id?: string }).id || token.sub,
-        };
-      }
-      return token;
-    },
-    async session({ session, token }) {
-      if (session.user && token.id) {
-        (session.user as { id?: string }).id = token.id as string;
-      }
-      return session;
-    },
-  },
-};
-
-// ✅ Export the NextAuth handler
-
-const handler = NextAuth(authOptions);
-export { handler as GET, handler as POST, authOptions };
+export { POST };

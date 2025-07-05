@@ -1,4 +1,3 @@
-// lib/authOptions.ts
 import { AuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
@@ -32,34 +31,27 @@ export const authOptions: AuthOptions = {
           id: user._id.toString(),
           name: user.name,
           email: user.email,
-        } satisfies Record<string, string>;
+        };
       },
     }),
   ],
-
   pages: {
     signIn: "/login",
   },
-
   session: {
     strategy: "jwt",
   },
-
   secret: process.env.NEXTAUTH_SECRET,
-
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        return {
-          ...token,
-          id: (user as { id?: string }).id || token.sub,
-        };
+        token.id = user.id;
       }
       return token;
     },
     async session({ session, token }) {
       if (session.user && token.id) {
-        (session.user as { id?: string }).id = token.id as string;
+        session.user.id = token.id as string;
       }
       return session;
     },
