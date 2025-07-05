@@ -2,7 +2,7 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import CertificateDownload from "./CertificateDownload";
+import CertificateDownload from "./CertificateDownloadClient";
 
 export default async function Home() {
   const session = await getServerSession(authOptions);
