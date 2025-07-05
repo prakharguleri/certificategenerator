@@ -46,7 +46,7 @@ export const authOptions: AuthOptions = {
             id: user._id.toString(),
             name: user.name,
             email: user.email
-          } as AuthUser;
+          };
 
         } catch (error) {
           console.error("Authorization error:", error);
@@ -72,8 +72,10 @@ export const authOptions: AuthOptions = {
       return token;
     },
     async session({ session, token }) {
-      if (session.user && token.id) {
+      if (session.user) {
         session.user.id = token.id as string;
+        session.user.name = token.name;
+        session.user.email = token.email;
       }
       return session;
     }
