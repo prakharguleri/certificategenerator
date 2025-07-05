@@ -14,6 +14,7 @@ export default function LoginPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setError('');
 
     const res = await signIn('credentials', {
       ...form,
@@ -21,16 +22,20 @@ export default function LoginPage() {
     });
 
     if (res?.ok) {
-      router.push('/dashboard');
+      router.push('/');
     } else {
-      setError('Login failed');
+      if (res?.error === 'CredentialsSignin') {
+        setError('Invalid email or password');
+      } else {
+        setError('Login failed. Please try again.');
+      }
     }
 
     setLoading(false);
   };
 
   const handleGoogleLogin = () => {
-    signIn('google');
+    signIn('google', { callbackUrl: '/' });
   };
 
   return (
@@ -72,12 +77,12 @@ export default function LoginPage() {
         </button>
 
         <div className="text-center pt-2">
-          <span className="text-gray-500">Don’t have an account?</span>{' '}
+          <span className="text-gray-500">Need Authorization?</span>{' '}
           <Link
             href="/register"
             className="text-blue-600 hover:underline font-medium"
           >
-            Create one
+            Request
           </Link>
         </div>
       </div>
