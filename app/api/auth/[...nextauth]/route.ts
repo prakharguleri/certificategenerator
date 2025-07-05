@@ -38,7 +38,7 @@ export const authOptions = {
 
   pages: {
     signIn: "/login",
-  }, // ✅ do not forget this comma
+  },
 
   session: {
     strategy: "jwt",
@@ -49,13 +49,16 @@ export const authOptions = {
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        token.id = user.id || token.sub;
+        return {
+          ...token,
+          id: (user as any).id || token.sub,
+        };
       }
       return token;
     },
     async session({ session, token }) {
-      if (token && session.user) {
-        // @ts-ignore
+      if (session.user && token.id) {
+        // @ts-expect-error - augment session.user with id
         session.user.id = token.id;
       }
       return session;
