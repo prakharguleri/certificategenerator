@@ -6,7 +6,9 @@ export async function GET() {
     await connectToDB();
     const users = await User.find({});
     return Response.json(users);
-  } catch (err: any) {
-    return new Response("DB Error: " + err.message, { status: 500 });
+  } catch (err) {
+    const errorMessage =
+      err instanceof Error ? err.message : 'Unknown error occurred';
+    return new Response('DB Error: ' + errorMessage, { status: 500 });
   }
 }
