@@ -3,6 +3,7 @@ import { connectToDB } from "@/lib/mongodb";
 import User from "@/lib/user";
 import bcrypt from "bcryptjs";
 
+// Only export the POST function directly (remove the duplicate export at bottom)
 export async function POST(request: Request) {
   try {
     const { email, password, name } = await request.json();
@@ -47,4 +48,4 @@ export async function POST(request: Request) {
   }
 }
 
-export { POST };
+// REMOVE THIS LINE: export { POST };
