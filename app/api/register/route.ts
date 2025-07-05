@@ -3,7 +3,6 @@ import { connectToDB } from "@/lib/mongodb";
 import User from "@/lib/user";
 import bcrypt from "bcryptjs";
 
-// Only export the POST function directly (remove the duplicate export at bottom)
 export async function POST(request: Request) {
   try {
     const { email, password, name } = await request.json();
@@ -17,7 +16,9 @@ export async function POST(request: Request) {
 
     await connectToDB();
     
-    const existingUser = await User.findOne({ email });
+    // Type-safe query with exec()
+    const existingUser = await User.findOne({ email }).exec();
+    
     if (existingUser) {
       return NextResponse.json(
         { error: "User already exists" },
@@ -27,13 +28,12 @@ export async function POST(request: Request) {
 
     const hashedPassword = await bcrypt.hash(password, 12);
     
-    const newUser = new User({
+    // Type-safe document creation
+    await User.create({
       email,
       password: hashedPassword,
-      name,
+      name
     });
-
-    await newUser.save();
 
     return NextResponse.json(
       { message: "User created successfully" },
@@ -47,5 +47,3 @@ export async function POST(request: Request) {
     );
   }
 }
-
-// REMOVE THIS LINE: export { POST };

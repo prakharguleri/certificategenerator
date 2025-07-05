@@ -16,7 +16,8 @@
     "incremental": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./*"],
+      "@lib/*": ["lib/*"]
     },
     "typeRoots": ["./node_modules/@types", "./types"],
     "plugins": [
@@ -24,7 +25,7 @@
         "name": "next"
       }
     ],
-    "allowImportingTsExtensions": true,
+    "types": ["node", "bcryptjs"],
     "noUncheckedIndexedAccess": true,
     "strictNullChecks": true,
     "strictBindCallApply": true,
