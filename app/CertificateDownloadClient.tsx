@@ -1,3 +1,6 @@
+// ================================
+// FRONTEND: CertificateDownloadClient.tsx
+// ================================
 'use client';
 
 import { useSession, signOut } from 'next-auth/react';
@@ -62,7 +65,7 @@ const programmes = [
 const API_BASE = 'https://certificateapi-production.up.railway.app';
 
 export default function CertificateDownload() {
-  const { data: session, status } = useSession();
+  const { status } = useSession();
   const router = useRouter();
 
   useEffect(() => {
@@ -103,8 +106,9 @@ export default function CertificateDownload() {
       a.download = `${entryNumber}.pdf`;
       a.click();
       window.URL.revokeObjectURL(url);
-    } catch (err: any) {
-      setError(err.message || 'Failed to download certificate');
+    } catch (err: unknown) {
+      if (err instanceof Error) setError(err.message);
+      else setError('Failed to download certificate');
     } finally {
       setIsLoading(false);
     }
@@ -139,8 +143,9 @@ export default function CertificateDownload() {
       a.download = `certificates_${sessionId}_${semesterId}_${programmeId}.zip`;
       a.click();
       window.URL.revokeObjectURL(url);
-    } catch (err: any) {
-      setError(err.message || 'Failed to download bulk certificates');
+    } catch (err: unknown) {
+      if (err instanceof Error) setError(err.message);
+      else setError('Failed to download bulk certificates');
     } finally {
       setIsLoading(false);
     }
@@ -153,7 +158,6 @@ export default function CertificateDownload() {
   return (
     <div className="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
       <h2 className="text-2xl font-bold text-center mb-6">Certificate Portal</h2>
-
       <div className="max-w-md mx-auto bg-white p-6 rounded shadow-md space-y-6">
         <div>
           <label className="block mb-1 font-medium">Entry Number</label>

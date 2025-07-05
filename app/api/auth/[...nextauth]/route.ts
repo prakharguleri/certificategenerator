@@ -1,11 +1,11 @@
-import NextAuth from "next-auth";
+import NextAuth, { AuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import { connectToDB } from "@/lib/mongodb";
 import User from "@/lib/user";
 
-export const authOptions = {
+export const authOptions: AuthOptions = {
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
@@ -31,7 +31,7 @@ export const authOptions = {
           id: user._id.toString(),
           name: user.name,
           email: user.email,
-        };
+        } satisfies Record<string, string>;
       },
     }),
   ],
@@ -51,15 +51,14 @@ export const authOptions = {
       if (user) {
         return {
           ...token,
-          id: (user as any).id || token.sub,
+          id: (user as { id?: string }).id || token.sub,
         };
       }
       return token;
     },
     async session({ session, token }) {
       if (session.user && token.id) {
-        // @ts-expect-error - augment session.user with id
-        session.user.id = token.id;
+        (session.user as { id?: string }).id = token.id as string;
       }
       return session;
     },
