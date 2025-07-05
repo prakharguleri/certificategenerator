@@ -1,9 +1,10 @@
+// lib/authOptions.ts
 import { AuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
-import { connectToDB } from "./mongodb";
-import User from "./user";
+import { connectToDB } from "@/lib/mongodb";
+import User from "@/lib/user";
 
 export const authOptions: AuthOptions = {
   providers: [
