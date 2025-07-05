@@ -1,15 +1,24 @@
 'use client';
 
 import { signIn } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [form, setForm] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  // Redirect to /unauthorized if error=Unauthorized is present
+  useEffect(() => {
+    const errorParam = searchParams.get('error');
+    if (errorParam === 'Unauthorized') {
+      router.push('/unauthorized');
+    }
+  }, [searchParams, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,7 +35,7 @@ export default function LoginPage() {
     } else {
       if (res?.error === 'CredentialsSignin') {
         setError('Invalid email or password');
-      } else {
+      } else if (res?.error) {
         setError('Login failed. Please try again.');
       }
     }
