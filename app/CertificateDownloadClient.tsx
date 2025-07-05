@@ -59,6 +59,8 @@ const programmes = [
   { id: 34, label: 'EXECUTIVE MBA' },
 ];
 
+const API_BASE = 'https://certificateapi-production.up.railway.app';
+
 export default function CertificateDownload() {
   const { data: session, status } = useSession();
   const router = useRouter();
@@ -86,7 +88,7 @@ export default function CertificateDownload() {
     setError('');
 
     try {
-      const response = await fetch('http://localhost:5000/generate', {
+      const response = await fetch(`${API_BASE}/generate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ entryNumber }),
@@ -101,12 +103,8 @@ export default function CertificateDownload() {
       a.download = `${entryNumber}.pdf`;
       a.click();
       window.URL.revokeObjectURL(url);
-    } catch (err: unknown) {
-      if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        setError('Failed to download certificate');
-      }
+    } catch (err: any) {
+      setError(err.message || 'Failed to download certificate');
     } finally {
       setIsLoading(false);
     }
@@ -122,7 +120,7 @@ export default function CertificateDownload() {
     setError('');
 
     try {
-      const response = await fetch('http://localhost:5000/bulk-download', {
+      const response = await fetch(`${API_BASE}/bulk-download`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -141,12 +139,8 @@ export default function CertificateDownload() {
       a.download = `certificates_${sessionId}_${semesterId}_${programmeId}.zip`;
       a.click();
       window.URL.revokeObjectURL(url);
-    } catch (err: unknown) {
-      if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        setError('Failed to download bulk certificates');
-      }
+    } catch (err: any) {
+      setError(err.message || 'Failed to download bulk certificates');
     } finally {
       setIsLoading(false);
     }
@@ -158,8 +152,81 @@ export default function CertificateDownload() {
 
   return (
     <div className="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
-      {/* UI code remains unchanged */}
-      {/* ... */}
+      <h2 className="text-2xl font-bold text-center mb-6">Certificate Portal</h2>
+
+      <div className="max-w-md mx-auto bg-white p-6 rounded shadow-md space-y-6">
+        <div>
+          <label className="block mb-1 font-medium">Entry Number</label>
+          <input
+            type="text"
+            className="w-full border p-2 rounded"
+            value={entryNumber}
+            onChange={(e) => setEntryNumber(e.target.value)}
+          />
+          <button
+            className="mt-2 bg-blue-600 text-white px-4 py-2 rounded w-full"
+            onClick={handleSingleDownload}
+            disabled={isLoading}
+          >
+            {isLoading ? 'Generating...' : 'Download Certificate'}
+          </button>
+        </div>
+
+        <div className="border-t pt-4">
+          <label className="block mb-1 font-medium">Session</label>
+          <select
+            className="w-full border p-2 rounded"
+            value={sessionId}
+            onChange={(e) => setSessionId(e.target.value)}
+          >
+            <option value="">Select</option>
+            {sessions.map((s) => (
+              <option key={s.id} value={s.id}>{s.label}</option>
+            ))}
+          </select>
+
+          <label className="block mt-4 mb-1 font-medium">Semester</label>
+          <select
+            className="w-full border p-2 rounded"
+            value={semesterId}
+            onChange={(e) => setSemesterId(e.target.value)}
+          >
+            <option value="">Select</option>
+            {semesters.map((s) => (
+              <option key={s.id} value={s.id}>{s.label}</option>
+            ))}
+          </select>
+
+          <label className="block mt-4 mb-1 font-medium">Programme</label>
+          <select
+            className="w-full border p-2 rounded"
+            value={programmeId}
+            onChange={(e) => setProgrammeId(e.target.value)}
+          >
+            <option value="">Select</option>
+            {programmes.map((p) => (
+              <option key={p.id} value={p.id}>{p.label}</option>
+            ))}
+          </select>
+
+          <button
+            className="mt-4 bg-green-600 text-white px-4 py-2 rounded w-full"
+            onClick={handleBulkDownload}
+            disabled={isLoading}
+          >
+            {isLoading ? 'Generating ZIP...' : 'Download Bulk Certificates'}
+          </button>
+        </div>
+
+        {error && <p className="text-red-600 mt-2 text-center">{error}</p>}
+
+        <button
+          onClick={() => signOut()}
+          className="text-center text-sm text-gray-600 underline block mt-4"
+        >
+          Logout
+        </button>
+      </div>
     </div>
   );
 }
