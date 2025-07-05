@@ -5,14 +5,13 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 
-export default function LoginPage() {
+export default function LoginClient() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [form, setForm] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // Redirect to /unauthorized if error=Unauthorized is present
   useEffect(() => {
     const errorParam = searchParams.get('error');
     if (errorParam === 'Unauthorized') {
