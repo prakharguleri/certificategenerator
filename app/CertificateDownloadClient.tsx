@@ -62,8 +62,15 @@ const programmes = [
 const API_BASE = 'https://certificateapi-production.up.railway.app';
 
 export default function CertificateDownload() {
-  const { data: session, status } = useSession();
+  const { status } = useSession();
   const router = useRouter();
+
+  const [entryNumber, setEntryNumber] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [sessionId, setSessionId] = useState('');
+  const [semesterId, setSemesterId] = useState('');
+  const [programmeId, setProgrammeId] = useState('');
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -72,23 +79,8 @@ export default function CertificateDownload() {
   }, [status, router]);
 
   if (status === 'loading') {
-    return (
-      <div className="min-h-screen flex items-center justify-center text-lg">
-        Checking login status...
-      </div>
-    );
+    return <div className="p-4 text-center">Checking login status...</div>;
   }
-
-  if (status === 'unauthenticated') {
-    return null; // already redirecting
-  }
-
-  const [entryNumber, setEntryNumber] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [sessionId, setSessionId] = useState('');
-  const [semesterId, setSemesterId] = useState('');
-  const [programmeId, setProgrammeId] = useState('');
 
   const handleSingleDownload = async () => {
     if (!entryNumber) {
@@ -162,9 +154,7 @@ export default function CertificateDownload() {
 
   return (
     <div className="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
-      <h2 className="text-2xl font-bold text-center mb-1">Certificate Portal</h2>
-      <p className="text-center text-gray-600 mb-6">Welcome, {session?.user?.name || session?.user?.email}</p>
-
+      <h2 className="text-2xl font-bold text-center mb-6">Certificate Portal</h2>
       <div className="max-w-md mx-auto bg-white p-6 rounded shadow-md space-y-6">
         <div>
           <label className="block mb-1 font-medium">Entry Number</label>
