@@ -7,13 +7,11 @@ import User from "@/lib/user"; // your Mongoose model
 
 export const authOptions = {
   providers: [
-    // 🔐 Google OAuth
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
     }),
 
-    // 🔑 Credentials Provider
     CredentialsProvider({
       name: "Credentials",
       credentials: {
@@ -34,10 +32,7 @@ export const authOptions = {
           return null;
         }
 
-        const isValid = await bcrypt.compare(
-          credentials.password,
-          user.password
-        );
+        const isValid = await bcrypt.compare(credentials.password, user.password);
 
         if (!isValid) {
           console.log("❌ Invalid password");
@@ -55,7 +50,8 @@ export const authOptions = {
   ],
 
   pages: {
-    signIn: "/login", 
+    signIn: "/login",
+  },
 
   session: {
     strategy: "jwt",
@@ -73,6 +69,8 @@ export const authOptions = {
 
     async session({ session, token }) {
       if (token && session.user) {
+        // TypeScript might complain, ignore if needed:
+        // @ts-ignore
         session.user.id = token.id;
       }
       return session;
