@@ -15,10 +15,8 @@ export async function POST(request: Request) {
     }
 
     await connectToDB();
-    
-    // Type-safe query with exec()
+
     const existingUser = await User.findOne({ email }).exec();
-    
     if (existingUser) {
       return NextResponse.json(
         { error: "User already exists" },
@@ -27,16 +25,19 @@ export async function POST(request: Request) {
     }
 
     const hashedPassword = await bcrypt.hash(password, 12);
-    
-    // Type-safe document creation
+
     await User.create({
       email,
       password: hashedPassword,
-      name
+      name,
+      approved: false // ✅ mark as not approved
     });
 
     return NextResponse.json(
-      { message: "User created successfully" },
+      {
+        message:
+          "Registration successful. Awaiting admin approval before login.",
+      },
       { status: 201 }
     );
   } catch (error) {
