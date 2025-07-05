@@ -3,7 +3,7 @@ import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import { connectToDB } from "@/lib/mongodb";
-import User from "@/lib/user"; // your Mongoose model
+import User from "@/lib/user";
 
 export const authOptions = {
   providers: [
@@ -11,7 +11,6 @@ export const authOptions = {
       clientId: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
     }),
-
     CredentialsProvider({
       name: "Credentials",
       credentials: {
@@ -19,27 +18,15 @@ export const authOptions = {
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) {
-          console.log("❌ Missing email or password");
-          return null;
-        }
+        if (!credentials?.email || !credentials?.password) return null;
 
         await connectToDB();
-
         const user = await User.findOne({ email: credentials.email });
-        if (!user) {
-          console.log("❌ User not found");
-          return null;
-        }
+        if (!user) return null;
 
         const isValid = await bcrypt.compare(credentials.password, user.password);
+        if (!isValid) return null;
 
-        if (!isValid) {
-          console.log("❌ Invalid password");
-          return null;
-        }
-
-        console.log("✅ Login success:", user.email);
         return {
           id: user._id.toString(),
           name: user.name,
@@ -51,7 +38,7 @@ export const authOptions = {
 
   pages: {
     signIn: "/login",
-  },
+  }, // ✅ do not forget this comma
 
   session: {
     strategy: "jwt",
@@ -66,10 +53,8 @@ export const authOptions = {
       }
       return token;
     },
-
     async session({ session, token }) {
       if (token && session.user) {
-        // TypeScript might complain, ignore if needed:
         // @ts-ignore
         session.user.id = token.id;
       }
