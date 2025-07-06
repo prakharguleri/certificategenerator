@@ -23,17 +23,30 @@ export const connectToDB = async () => {
   try {
     if (!global.mongoose.promise) {
       const opts: ConnectOptions = {
-        dbName: 'loginuser',
+        dbName: 'certificateDB',
         serverSelectionTimeoutMS: 5000,
       };
 
-      global.mongoose.promise = mongoose.connect(MONGODB_URI, opts).then((mongoose) => {
-        return mongoose;
+      global.mongoose.promise = mongoose.connect(MONGODB_URI, opts).then((mongooseInstance) => {
+        // 🧼 Handle graceful shutdown
+        process.on('SIGINT', async () => {
+          await mongooseInstance.connection.close();
+          console.log('🛑 MongoDB connection closed on SIGINT');
+          process.exit(0);
+        });
+
+        process.on('SIGTERM', async () => {
+          await mongooseInstance.connection.close();
+          console.log('🛑 MongoDB connection closed on SIGTERM');
+          process.exit(0);
+        });
+
+        return mongooseInstance;
       });
     }
 
     global.mongoose.conn = await global.mongoose.promise;
-    console.log('✅ MongoDB Connected');
+    console.log('✅ MongoDB Connected to certificateDB');
     return global.mongoose.conn;
   } catch (error) {
     console.error('❌ MongoDB Connection Error:', error);
