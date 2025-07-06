@@ -21,7 +21,6 @@ export const authOptions: AuthOptions = {
         await connectToDB();
 
         const user = await User.findOne({ email: credentials?.email });
-
         if (!user) throw new Error('No user found');
         if (!credentials?.password) throw new Error('Password is required');
 
@@ -53,20 +52,20 @@ export const authOptions: AuthOptions = {
         await connectToDB();
 
         const existingUser = await User.findOne({ email: profile?.email });
-        const isRegistering = (account?.callbackUrl as string)?.includes('/google-register');
 
-        if (!existingUser && isRegistering) {
+        if (!existingUser) {
+          // 🔥 Always register Google user if they don't exist
           await User.create({
             email: profile?.email,
             name: profile?.name,
-            password: '', // empty because Google users don't have local passwords
+            password: '', // Google users don't use password
             approved: false,
           });
 
-          return false; // block login until manually approved
+          return false; // ❌ block login until manually approved
         }
 
-        if (!existingUser || !existingUser.approved) {
+        if (!existingUser.approved) {
           return false;
         }
       }
