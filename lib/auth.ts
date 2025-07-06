@@ -50,7 +50,7 @@ export const authOptions: AuthOptions = {
         const existingUser = await User.findOne({ email: token.email });
 
         if (!existingUser || !existingUser.approved) {
-          throw new Error('Unauthorized'); // will redirect to /unauthorized
+          return null;
         }
 
         token.id = existingUser._id.toString();
