@@ -37,7 +37,7 @@ export const authOptions: AuthOptions = {
 
   pages: {
     signIn: '/login',
-    error: '/unauthorized', // This will handle redirect for failed sign-ins
+    error: '/unauthorized', // redirect here for blocked or failed logins
   },
 
   session: {
@@ -45,27 +45,24 @@ export const authOptions: AuthOptions = {
   },
 
   callbacks: {
-    // ✅ New logic for Google approval check
-    async signIn({ account, profile }) {
-      if (account?.provider === 'google') {
-        await connectToDB();
-        const user = await User.findOne({ email: profile?.email });
+    async signIn({ account: _account, profile }) {
+      // Only apply approval check for Google login
+      await connectToDB();
+      const user = await User.findOne({ email: profile?.email });
 
-        if (!user || !user.approved) {
-          return '/unauthorized'; // 🔥 redirect to error page
-        }
+      if (!user || !user.approved) {
+        return '/unauthorized'; // ❌ blocked users redirected here
       }
 
-      return true; // allow sign-in
+      return true; // ✅ allow login
     },
 
-    async jwt({ token, account, user }) {
+    async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
         token.name = user.name;
         token.email = user.email;
       }
-
       return token;
     },
 
@@ -75,7 +72,6 @@ export const authOptions: AuthOptions = {
         session.user.name = token.name;
         session.user.email = token.email;
       }
-
       return session;
     },
   },
