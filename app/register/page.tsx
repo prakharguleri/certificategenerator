@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { signIn } from 'next-auth/react';
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -29,6 +30,11 @@ export default function RegisterPage() {
     }
 
     setLoading(false);
+  };
+
+  const handleGoogleRegister = () => {
+    // Trigger Google OAuth with redirect to /google-register to insert into MongoDB
+    signIn('google', { callbackUrl: '/google-register' });
   };
 
   return (
@@ -72,8 +78,17 @@ export default function RegisterPage() {
         >
           {loading ? 'Registering...' : 'Register'}
         </button>
+
+        <div className="text-center text-gray-500">OR</div>
+
+        <button
+          type="button"
+          onClick={handleGoogleRegister}
+          className="w-full bg-red-500 text-white py-3 rounded-lg hover:bg-red-600"
+        >
+          Register with Google
+        </button>
       </form>
     </div>
   );
 }
-

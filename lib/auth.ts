@@ -1,9 +1,16 @@
 import { AuthOptions } from 'next-auth';
 import GoogleProvider from 'next-auth/providers/google';
 import CredentialsProvider from 'next-auth/providers/credentials';
+import type { Account, Profile, Session, User as AuthUser } from 'next-auth';
+import type { JWT } from 'next-auth/jwt';
+import bcrypt from 'bcryptjs';
+
 import User from '@/lib/user';
 import { connectToDB } from '@/lib/mongodb';
-import bcrypt from 'bcryptjs';
+
+type CustomAccount = Account & {
+  callbackUrl?: string;
+};
 
 export const authOptions: AuthOptions = {
   providers: [
@@ -45,34 +52,66 @@ export const authOptions: AuthOptions = {
   },
 
   callbacks: {
-    async signIn({ account, profile }) {
+    async signIn({
+      account,
+      profile,
+    }: {
+      account: CustomAccount | null;
+      profile?: Profile;
+    }): Promise<string | boolean> {
       if (account?.provider === 'google') {
         await connectToDB();
-        const user = await User.findOne({ email: profile?.email });
+        const existingUser = await User.findOne({ email: profile?.email });
+        const isRegistering = account.callbackUrl?.includes('/google-register');
 
-        if (!user || !user.approved) {
-          return '/unauthorized';
+        if (!existingUser && isRegistering) {
+          await User.create({
+            email: profile?.email,
+            name: profile?.name,
+            password: '',
+            approved: false,
+          });
+
+          return false; // block login until approved
+        }
+
+        if (!existingUser?.approved) {
+          return false;
         }
       }
 
       return true;
     },
 
-    async jwt({ token, user }) {
+    async jwt({
+      token,
+      user,
+    }: {
+      token: JWT;
+      user?: AuthUser;
+    }): Promise<JWT> {
       if (user) {
         token.id = user.id;
         token.name = user.name;
         token.email = user.email;
       }
+
       return token;
     },
 
-    async session({ session, token }) {
+    async session({
+      session,
+      token,
+    }: {
+      session: Session;
+      token: JWT;
+    }): Promise<Session> {
       if (session.user) {
-        session.user.id = token.id;
+        session.user.id = token.id as string;
         session.user.name = token.name;
         session.user.email = token.email;
       }
+
       return session;
     },
   },
