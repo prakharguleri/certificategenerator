@@ -34,30 +34,32 @@ export const authOptions: AuthOptions = {
       },
     }),
   ],
+
   pages: {
     signIn: '/login',
-    error: '/unauthorized', // 🔥 Redirect on not-approved Google login
+    error: '/unauthorized', // This will handle redirect for failed sign-ins
   },
+
   session: {
     strategy: 'jwt',
   },
+
   callbacks: {
-    async jwt({ token, account, user }) {
-      await connectToDB();
-
-      // Only handle Google login here
+    // ✅ New logic for Google approval check
+    async signIn({ account, profile }) {
       if (account?.provider === 'google') {
-        const existingUser = await User.findOne({ email: token.email });
+        await connectToDB();
+        const user = await User.findOne({ email: profile?.email });
 
-        if (!existingUser || !existingUser.approved) {
-          return null;
+        if (!user || !user.approved) {
+          return '/unauthorized'; // 🔥 redirect to error page
         }
-
-        token.id = existingUser._id.toString();
-        token.name = existingUser.name;
-        token.email = existingUser.email;
       }
 
+      return true; // allow sign-in
+    },
+
+    async jwt({ token, account, user }) {
       if (user) {
         token.id = user.id;
         token.name = user.name;
@@ -66,14 +68,17 @@ export const authOptions: AuthOptions = {
 
       return token;
     },
+
     async session({ session, token }) {
       if (session.user) {
         session.user.id = token.id;
         session.user.name = token.name;
         session.user.email = token.email;
       }
+
       return session;
     },
   },
+
   secret: process.env.NEXTAUTH_SECRET,
 };
