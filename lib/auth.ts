@@ -1,19 +1,17 @@
 import { AuthOptions } from 'next-auth';
 import GoogleProvider from 'next-auth/providers/google';
 import CredentialsProvider from 'next-auth/providers/credentials';
-import bcrypt from 'bcryptjs';
 import User from '@/lib/user';
 import { connectToDB } from '@/lib/mongodb';
+import bcrypt from 'bcryptjs';
 
 export const authOptions: AuthOptions = {
   providers: [
-    // Google OAuth Provider
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
     }),
 
-    // Email/Password Provider
     CredentialsProvider({
       name: 'Credentials',
       credentials: {
@@ -21,14 +19,15 @@ export const authOptions: AuthOptions = {
         password: { label: 'Password', type: 'password' },
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) {
-          throw new Error('Missing credentials');
-        }
-
         await connectToDB();
 
-        const user = await User.findOne({ email: credentials.email });
+        const user = await User.findOne({ email: credentials?.email });
+
         if (!user) throw new Error('No user found');
+
+        if (!credentials?.password || !user.password) {
+          throw new Error('Invalid credentials');
+        }
 
         const isValid = await bcrypt.compare(credentials.password, user.password);
         if (!isValid) throw new Error('Invalid password');
@@ -54,27 +53,26 @@ export const authOptions: AuthOptions = {
   },
 
   callbacks: {
-    // Google users go through this first
     async signIn({ account, profile }) {
       if (account?.provider === 'google') {
         await connectToDB();
 
         const existingUser = await User.findOne({ email: profile?.email });
-        const isRegistering = account.callbackUrl?.includes('/google-register');
+        const isRegistering = account?.callbackUrl?.includes('/google-register');
 
         if (!existingUser && isRegistering) {
           await User.create({
             email: profile?.email,
-            name: profile?.name || 'Google User',
-            password: '', // No password for Google
+            name: profile?.name,
+            password: '',
             approved: false,
           });
 
-          return false; // stop login until approved
+          return false; // block login, wait for approval
         }
 
-        if (!existingUser?.approved) {
-          return false;
+        if (!existingUser || !existingUser.approved) {
+          return false; // block login if not approved
         }
       }
 
