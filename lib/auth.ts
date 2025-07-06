@@ -11,7 +11,6 @@ export const authOptions: AuthOptions = {
       clientId: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
     }),
-
     CredentialsProvider({
       name: 'Credentials',
       credentials: {
@@ -24,14 +23,10 @@ export const authOptions: AuthOptions = {
         const user = await User.findOne({ email: credentials?.email });
 
         if (!user) throw new Error('No user found');
+        if (!credentials?.password) throw new Error('Password is required');
 
-        if (!credentials?.password || !user.password) {
-          throw new Error('Invalid credentials');
-        }
-
-        const isValid = await bcrypt.compare(credentials.password, user.password);
+        const isValid = await bcrypt.compare(credentials.password, user.password || '');
         if (!isValid) throw new Error('Invalid password');
-
         if (!user.approved) throw new Error('User not approved');
 
         return {
@@ -58,21 +53,21 @@ export const authOptions: AuthOptions = {
         await connectToDB();
 
         const existingUser = await User.findOne({ email: profile?.email });
-        const isRegistering = account?.callbackUrl?.includes('/google-register');
+        const isRegistering = (account?.callbackUrl as string)?.includes('/google-register');
 
         if (!existingUser && isRegistering) {
           await User.create({
             email: profile?.email,
             name: profile?.name,
-            password: '',
+            password: '', // empty because Google users don't have local passwords
             approved: false,
           });
 
-          return false; // block login, wait for approval
+          return false; // block login until manually approved
         }
 
         if (!existingUser || !existingUser.approved) {
-          return false; // block login if not approved
+          return false;
         }
       }
 
