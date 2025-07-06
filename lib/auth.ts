@@ -1,9 +1,9 @@
 import { AuthOptions } from 'next-auth';
 import GoogleProvider from 'next-auth/providers/google';
 import CredentialsProvider from 'next-auth/providers/credentials';
+import bcrypt from 'bcryptjs';
 import User from '@/lib/user';
 import { connectToDB } from '@/lib/mongodb';
-import bcrypt from 'bcryptjs';
 
 export const authOptions: AuthOptions = {
   providers: [
@@ -11,6 +11,7 @@ export const authOptions: AuthOptions = {
       clientId: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
     }),
+
     CredentialsProvider({
       name: 'Credentials',
       credentials: {
@@ -21,13 +22,14 @@ export const authOptions: AuthOptions = {
         await connectToDB();
 
         const user = await User.findOne({ email: credentials?.email });
+
         if (!user) throw new Error('No user found');
         if (!credentials?.password) throw new Error('Password is required');
 
         const isValid = await bcrypt.compare(credentials.password, user.password || '');
         if (!isValid) throw new Error('Invalid password');
-        if (!user.approved) throw new Error('User not approved');
 
+        if (!user.approved) throw new Error('User not approved');
         return {
           id: user._id.toString(),
           name: user.name,
@@ -51,23 +53,21 @@ export const authOptions: AuthOptions = {
       if (account?.provider === 'google') {
         await connectToDB();
 
-        const existingUser = await User.findOne({ email: profile?.email });
+        const user = await User.findOne({ email: profile?.email });
 
-        if (!existingUser) {
-          // 🔥 Always register Google user if they don't exist
+        if (!user) {
+          // Register but don't allow login until approved
           await User.create({
-            email: profile?.email,
             name: profile?.name,
-            password: '', // Google users don't use password
+            email: profile?.email,
+            password: '',
             approved: false,
           });
 
-          return false; // ❌ block login until manually approved
-        }
-
-        if (!existingUser.approved) {
           return false;
         }
+
+        return user.approved;
       }
 
       return true;
