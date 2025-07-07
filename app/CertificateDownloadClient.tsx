@@ -168,7 +168,7 @@ export default function CertificateDownload() {
             type="text"
             className="w-full border p-2 rounded"
             value={entryNumber}
-            onChange={(e) => setEntryNumber(e.target.value)}
+            onChange={(e) => setEntryNumber(e.target.value.toUpperCase())}
           />
           <button
             className="mt-2 bg-blue-600 text-white px-4 py-2 rounded w-full disabled:opacity-50"
