@@ -68,7 +68,7 @@ const programmes: Option[] = [
 export default function CertificateDownload() {
   const { status } = useSession();
   const router = useRouter();
-  const [entryNumber, setEntryNumber] = useState('');
+  const [entryNumber, setentryNumber] = useState('');
   const [isSingleLoading, setIsSingleLoading] = useState(false);
   const [isBulkLoading, setIsBulkLoading] = useState(false);
   const [error, setError] = useState('');
@@ -168,7 +168,7 @@ export default function CertificateDownload() {
             type="text"
             className="w-full border p-2 rounded"
             value={entryNumber}
-            onChange={(e) => setEntryNumber(e.target.value.toUpperCase())}
+            onChange={(e) => setentryNumber(e.target.value.toUpperCase())}
           />
           <button
             className="mt-2 bg-blue-600 text-white px-4 py-2 rounded w-full disabled:opacity-50"

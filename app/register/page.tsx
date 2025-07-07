@@ -6,7 +6,7 @@ import { signIn } from 'next-auth/react';
 
 export default function RegisterPage() {
   const router = useRouter();
-  const [form, setForm] = useState({ name: '', email: '', password: '' });
+  const [form, setForm] = useState({ name: '', email: '', password: '', confirmPassword: '' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -14,6 +14,12 @@ export default function RegisterPage() {
     e.preventDefault();
     setLoading(true);
     setError('');
+
+    if (form.password !== form.confirmPassword) {
+      setError('Passwords do not match');
+      setLoading(false);
+      return;
+    }
 
     const res = await fetch('/api/register', {
       method: 'POST',
@@ -67,6 +73,14 @@ export default function RegisterPage() {
           className="w-full p-3 border rounded-lg"
           value={form.password}
           onChange={(e) => setForm({ ...form, password: e.target.value })}
+        />
+        <input
+          placeholder="Confirm Password"
+          type="password"
+          required
+          className="w-full p-3 border rounded-lg"
+          value={form.confirmPassword}
+          onChange={(e) => setForm({ ...form, confirmPassword: e.target.value })}
         />
 
         {error && <p className="text-red-500 text-sm text-center">{error}</p>}
