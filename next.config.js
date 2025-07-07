@@ -7,8 +7,8 @@ const nextConfig = {
     domains: ['lh3.googleusercontent.com'], // Add any other domains you need
   },
   experimental: {
-    serverActions: true, // If using Next.js server actions
+    serverActions: {}, // ✅ must be an object, not a boolean
   },
 }
 
-module.exports = nextConfig
+module.exports = nextConfig;
