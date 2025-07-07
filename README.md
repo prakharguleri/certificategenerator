@@ -42,7 +42,6 @@ You will be provided with temporary credentials to log in and generate mock cert
 
 ### Backend
 - Python (Flask) API for certificate generation
-- 
 ### Database
 - MongoDB (NoSQL) for certificate metadata and user records
 
