@@ -10,9 +10,9 @@ This project allows users to securely log in via institutional credentials or Go
 
 Users can log in via:
 
-- IIT Delhi Email Sign-In
+- Email Sign-In (Web 1.0)
 - Google Account Sign-In
-- IITD Auth System (coming soon or already integrated)
+- IITD Auth System 
 
 Only authenticated users are allowed to generate certificates.
 
@@ -22,7 +22,7 @@ Only authenticated users are allowed to generate certificates.
 
 If you're not an IIT Delhi user and wish to try a mock/demo version:
 
-Visit: [https://certificategenerator-production.up.railway.app](https://certificategenerator-production.up.railway.app)
+Visit: [https://certificategenerator-production.up.railway.app]
 
 To get access:
 1. Register on the site using your email.
@@ -42,11 +42,7 @@ You will be provided with temporary credentials to log in and generate mock cert
 
 ### Backend
 - Python (Flask) API for certificate generation
-- Uses:
-  - `docxtpl` for filling `.docx` templates
-  - `docx2pdf` for PDF conversion
-  - `zipfile` for bulk downloads
-
+- 
 ### Database
 - MongoDB (NoSQL) for certificate metadata and user records
 
