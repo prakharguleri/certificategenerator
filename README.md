@@ -1,36 +1,73 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# IIT Delhi Certificate Generator
 
-## Getting Started
+A certificate generation and download platform for students and staff of the **Indian Institute of Technology Delhi**.
 
-First, run the development server:
+This project allows users to securely log in via institutional credentials or Google, and download official or mock certificates based on session, semester, and programme data.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+---
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Authenticated Access
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Users can log in via:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- IIT Delhi Email Sign-In
+- Google Account Sign-In
+- IITD Auth System (coming soon or already integrated)
 
-## Learn More
+Only authenticated users are allowed to generate certificates.
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Demo / Mimic Site
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+If you're not an IIT Delhi user and wish to try a mock/demo version:
 
-## Deploy on Vercel
+Visit: [https://certificategenerator-production.up.railway.app](https://certificategenerator-production.up.railway.app)
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+To get access:
+1. Register on the site using your email.
+2. Then request approval by emailing: `prakhar7.cstaff@iitd.ac.in`
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+You will be provided with temporary credentials to log in and generate mock certificates for testing purposes.
+
+---
+
+## Tech Stack
+
+### Frontend
+- Next.js with TypeScript
+- App Router
+- Tailwind CSS (if used)
+- NextAuth.js for authentication
+
+### Backend
+- Python (Flask) API for certificate generation
+- Uses:
+  - `docxtpl` for filling `.docx` templates
+  - `docx2pdf` for PDF conversion
+  - `zipfile` for bulk downloads
+
+### Database
+- MongoDB (NoSQL) for certificate metadata and user records
+
+---
+
+## How It Works
+
+1. User logs in via IIT Delhi or Google.
+2. Fills in entry number or selects session/semester/programme.
+3. A `.docx` template is filled and converted to PDF via the Python backend.
+4. The file is streamed to the browser for direct download.
+
+---
+
+## Contact
+
+For access requests, contributions, or deployment queries:
+- Email: `prakhar7.cstaff@iitd.ac.in`
+
+---
+
+## Disclaimer
+
+This tool is intended for official use by IIT Delhi staff/students. Do not share credentials or misuse certificate generation for fraudulent purposes.
