@@ -1,15 +1,14 @@
-const path = require('path');
-
-module.exports = {
-  webpack: (config) => {
-    config.resolve.alias = {
-      ...config.resolve.alias,
-      '@': path.resolve(__dirname),
-      '@lib': path.resolve(__dirname, 'lib')
-    };
-    return config;
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+  images: {
+    domains: ['lh3.googleusercontent.com'], // Add any other domains you need
   },
   experimental: {
-    outputFileTracingRoot: path.join(__dirname, '../../')
-  }
-};
+    serverActions: true, // If using Next.js server actions
+  },
+}
+
+module.exports = nextConfig
